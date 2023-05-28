@@ -1,4 +1,4 @@
-package Ostrolutskyi_client_server_lab1;
+package client_server;
 
 import junit.framework.TestCase;
 
@@ -12,7 +12,7 @@ import javax.crypto.NoSuchPaddingException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
-import static Ostrolutskyi_client_server_lab1.MessagePacketProcessor.isValidPacket;
+import static client_server.MessagePacketProcessor.isValidPacket;
 
 
 public class MainTest extends TestCase

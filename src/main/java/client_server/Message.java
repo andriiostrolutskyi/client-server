@@ -1,4 +1,4 @@
-package Ostrolutskyi_client_server_lab1;
+package client_server;
 
 class Message {
     private int messageType;

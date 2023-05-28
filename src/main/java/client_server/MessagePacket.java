@@ -1,4 +1,4 @@
-package Ostrolutskyi_client_server_lab1;
+package client_server;
 
 import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
@@ -7,7 +7,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
-import static Ostrolutskyi_client_server_lab1.CRC16.calculateCRC16;
+import static client_server.CRC16.calculateCRC16;
 
 
 class MessagePacket {
