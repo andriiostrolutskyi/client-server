@@ -1,0 +1,25 @@
+# Created at 2023-05-27T21:13:04.640
+java.lang.UnsupportedClassVersionError: Ostrolutskyi_client_server_lab1/MainTest has been compiled by a more recent version of the Java Runtime (class file version 61.0), this version of the Java Runtime only recognizes class file versions up to 52.0
+	at java.lang.ClassLoader.defineClass1(Native Method)
+	at java.lang.ClassLoader.defineClass(Unknown Source)
+	at java.security.SecureClassLoader.defineClass(Unknown Source)
+	at java.net.URLClassLoader.defineClass(Unknown Source)
+	at java.net.URLClassLoader.access$100(Unknown Source)
+	at java.net.URLClassLoader$1.run(Unknown Source)
+	at java.net.URLClassLoader$1.run(Unknown Source)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at java.net.URLClassLoader.findClass(Unknown Source)
+	at java.lang.ClassLoader.loadClass(Unknown Source)
+	at sun.misc.Launcher$AppClassLoader.loadClass(Unknown Source)
+	at java.lang.ClassLoader.loadClass(Unknown Source)
+	at org.apache.maven.surefire.api.util.DefaultScanResult.loadClass(DefaultScanResult.java:115)
+	at org.apache.maven.surefire.api.util.DefaultScanResult.applyFilter(DefaultScanResult.java:85)
+	at org.apache.maven.surefire.junit4.JUnit4Provider.scanClassPath(JUnit4Provider.java:272)
+	at org.apache.maven.surefire.junit4.JUnit4Provider.setTestsToRun(JUnit4Provider.java:174)
+	at org.apache.maven.surefire.junit4.JUnit4Provider.invoke(JUnit4Provider.java:132)
+	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:385)
+	at org.apache.maven.surefire.booter.ForkedBooter.execute(ForkedBooter.java:162)
+	at org.apache.maven.surefire.booter.ForkedBooter.run(ForkedBooter.java:507)
+	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:495)
+
+
