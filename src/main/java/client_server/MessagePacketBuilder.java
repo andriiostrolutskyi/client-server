@@ -5,30 +5,31 @@ import java.nio.ByteBuffer;
 
 class MessagePacketBuilder {
 
+    //Builds a MessagePacket with clientID (int), messageID (long), packetLength (int), and unencrypted message (byte)
     static MessagePacket buildPacket(int clientID, long messageID, Message message) {
 
-        byte[] usefulInfo = message.getUsefulInfo().getBytes();
+        byte[] byteUsefulInfo = message.getUsefulInfo().getBytes();
 
-        int encryptedMessageLength = 8 + usefulInfo.length;
-        byte[] encryptedMessage = new byte[encryptedMessageLength];
+        int messageLength = 8 + byteUsefulInfo.length;
+        byte[] byteMessage = new byte[messageLength];
 
         int intMessageType = message.getMessageType();
         ByteBuffer a = ByteBuffer.allocate(4);
         a.putInt(intMessageType);
-        byte[] messageType = a.array();
+        byte[] byteMessageType = a.array();
 
         int intUserID = message.getUserID();
         ByteBuffer b = ByteBuffer.allocate(4);
         b.putInt(intUserID);
-        byte[] userID = b.array();
+        byte[] byteUserID = b.array();
 
-        System.arraycopy(messageType, 0, encryptedMessage, 0, messageType.length);
-        System.arraycopy(userID, 0, encryptedMessage, messageType.length, userID.length);
-        System.arraycopy(usefulInfo, 0, encryptedMessage, messageType.length + userID.length, usefulInfo.length);
+        System.arraycopy(byteMessageType, 0, byteMessage, 0, byteMessageType.length);
+        System.arraycopy(byteUserID, 0, byteMessage, byteMessageType.length, byteUserID.length);
+        System.arraycopy(byteUsefulInfo, 0, byteMessage, byteMessageType.length + byteUserID.length, byteUsefulInfo.length);
 
-        int packetLength = encryptedMessage.length + 18;
+        int packetLength = byteMessage.length + 18;
 
-        return new MessagePacket(clientID, messageID, packetLength, encryptedMessage);
+        return new MessagePacket(clientID, messageID, packetLength, byteMessage);
 
     }
 }
