@@ -55,9 +55,9 @@ class MessagePacketProcessor {
         long messageID = ByteBuffer.wrap(packet, 2, 8).getLong();
         int packetLength = ByteBuffer.wrap(packet, 10, 4).getInt();
 
-        byte[] encryptedMessage = Arrays.copyOfRange(packet, 16, packetLength - 2);
+        byte[] decryptedMessage = Arrays.copyOfRange(packet, 16, packetLength - 2);
 
-        return new MessagePacket(clientID, messageID, packetLength, encryptedMessage);
+        return new MessagePacket(clientID, messageID, packetLength, decryptedMessage);
     }
 
     static byte[] decryptMessageBody(byte[] encryptedByteMessagePacket) throws NoSuchPaddingException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException {
