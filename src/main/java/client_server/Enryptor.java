@@ -3,10 +3,10 @@ package client_server;
 
 import java.nio.ByteBuffer;
 
-class MessagePacketBuilder {
+public class Enryptor {
 
     //Builds a MessagePacket with clientID (int), messageID (long), packetLength (int), and unencrypted message (byte)
-    static MessagePacket buildPacket(int clientID, long messageID, Message message) {
+    public static MessagePacket buildPacket(int clientID, long messageID, Message message) {
 
         byte[] byteUsefulInfo = message.getUsefulInfo().getBytes();
 

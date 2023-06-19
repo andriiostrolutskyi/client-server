@@ -38,7 +38,7 @@ public class CRC16 {
     };
 
 
-    public static int calculateCRC16(byte[] bytes) {
+    static int calculateCRC16(byte[] bytes) {
 
         int crc = 0x0000;
         for (byte b : bytes) {

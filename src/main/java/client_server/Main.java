@@ -3,36 +3,39 @@ package client_server;
 import javax.crypto.*;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
 
-import org.apache.commons.codec.binary.Hex;
+import client_server.pseudo_client.Client;
+import client_server.pseudo_client.Sender;
+import client_server.pseudo_server.Receiver;
+import client_server.pseudo_server.Storage;
 
 
 public class Main {
 
-    public static void main(String[] args) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+    public static void main(String[] args) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, ExecutionException, InterruptedException {
 
-        //Build package:
+        Sender sender = new Sender();
+        Receiver receiver = new Receiver();
 
-        int messageType = 1;
-        int userID = 1;
-        String usefulInfo = "Anything";
+        Client client1 = new Client(127, 1, 1, sender);
+        Client client2 = new Client(128, 1, 1, sender);
 
-        int clientID = 127;
-        long messageID = 15545;
 
-        Message message = new Message(messageType, userID, usefulInfo);
-        MessagePacket messagePacket = MessagePacketBuilder.buildPacket(clientID, messageID, message);
+        ArrayList<byte[]> requests = new ArrayList<>();
+        requests.add(client1.decreaseNumberOfProducts(100));
+        requests.add(client1.increaseNumberOfProducts(150));
+        requests.add(client2.decreaseNumberOfProducts(20));
+        requests.add(client2.decreaseNumberOfProducts(20));
+        requests.add(client1.decreaseNumberOfProducts(10));
+        requests.add(client1.increaseNumberOfProducts(1000));
+        requests.add(client1.addProductGroup("Dairy"));
+        requests.add(client1.setPrice(123));
 
-        byte[] encryptedByteMessagePacket = messagePacket.encryptMessageBody(messagePacket.toByte());
-        System.out.println("Packet with encrypted message body: " + Hex.encodeHexString(encryptedByteMessagePacket) + "\n");
+        sender.sendMessage(requests, receiver);
 
-        //Process package:
-
-        System.out.println("Decrypted packet: ");
-        MessagePacket mP = MessagePacketProcessor.parsePacket(encryptedByteMessagePacket);
-        Message m = mP.getMessage();
-        System.out.println("Client ID: " + mP.getClientID() + "\n" + "Message ID: " + mP.getMessageID() + "\n" +
-                           "Packet length: " + mP.getPacketLength() + "\n" + m);
+        System.out.println("The actual number of products in Storage: " + Storage.getNumberOfProducts());
 
     }
 }

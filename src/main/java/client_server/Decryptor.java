@@ -7,13 +7,12 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
-import static client_server.CRC16.calculateCRC16;
 
 
-class MessagePacketProcessor {
+public class Decryptor {
     private static final byte MAGIC_BYTE = 0x13;
 
-    static boolean isValidPacket(byte[] packet) {
+    public static boolean isValidPacket(byte[] packet) {
 
         if (packet.length < 18 || packet[0] != MAGIC_BYTE) {
             return false;
@@ -27,7 +26,7 @@ class MessagePacketProcessor {
         //Check if the expected CRC16 of the first 14 bytes matches the calculated CRC16
         int expectedHeaderCRC16 = ByteBuffer.wrap(packet, 14, 2).getShort(); //& 0xFFFF;
         byte[] headerSubset = Arrays.copyOfRange(packet, 0, 13);
-        int calculatedHeaderCRC16 = calculateCRC16(headerSubset);
+        int calculatedHeaderCRC16 = CRC16.calculateCRC16(headerSubset);
         if (expectedHeaderCRC16 != calculatedHeaderCRC16) {
             return false;
         }
@@ -35,7 +34,7 @@ class MessagePacketProcessor {
         //Check if the expected CRC16 of the message matches the calculated CRC16
         int expectedMessageCRC16 = ByteBuffer.wrap(packet, packetLength - 2, 2).getShort(); //& 0xFFFF;
         byte[] messageSubset = Arrays.copyOfRange(packet, 16, packetLength - 2);
-        int calculatedMessageCRC16 = calculateCRC16(messageSubset);
+        int calculatedMessageCRC16 = CRC16.calculateCRC16(messageSubset);
         if (expectedMessageCRC16 != calculatedMessageCRC16) {
             return false;
         }
@@ -43,7 +42,7 @@ class MessagePacketProcessor {
         return true;
     }
 
-    static MessagePacket parsePacket(byte[] encryptedPacket) throws NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+    public static MessagePacket parsePacket(byte[] encryptedPacket) throws NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
 
         byte[] packet = decryptMessageBody(encryptedPacket);
 
@@ -60,7 +59,7 @@ class MessagePacketProcessor {
         return new MessagePacket(clientID, messageID, packetLength, decryptedMessage);
     }
 
-    static byte[] decryptMessageBody(byte[] encryptedByteMessagePacket) throws NoSuchPaddingException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException {
+    public static byte[] decryptMessageBody(byte[] encryptedByteMessagePacket) throws NoSuchPaddingException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException {
 
         Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
         byte[] keyBytes = new byte[16];

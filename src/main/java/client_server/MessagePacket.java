@@ -7,35 +7,33 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
-import static client_server.CRC16.calculateCRC16;
 
-
-class MessagePacket {
+public class MessagePacket {
     private final int clientID;
     private final long messageID;
     private final int packetLength;
     private final byte[] message;
 
-    MessagePacket(int clientID, long messageID, int packetLength, byte[] message) {
+    public MessagePacket(int clientID, long messageID, int packetLength, byte[] message) {
         this.clientID = clientID;
         this.messageID = messageID;
         this.packetLength = packetLength;
         this.message = message;
     }
 
-    int getClientID() {
+    public int getClientID() {
         return clientID;
     }
 
-    long getMessageID() {
+    public long getMessageID() {
         return messageID;
     }
 
-    int getPacketLength() {
+    public int getPacketLength() {
         return packetLength;
     }
 
-    Message getMessage() {
+    public Message getMessage() {
 
         int messageType = ByteBuffer.wrap(message, 0, 4).getInt();
         int userID = ByteBuffer.wrap(message, 4, 4).getInt();
@@ -44,7 +42,7 @@ class MessagePacket {
         return new Message(messageType, userID, usefulInfo);
     }
 
-    byte[] toByte() {
+    public byte[] toByte() {
         byte[] byteMessagePacket = new byte[18 + message.length];
 
         byteMessagePacket[0] = 0x13;
@@ -60,7 +58,7 @@ class MessagePacket {
         System.arraycopy(bytePacketLength, 0, byteMessagePacket, 10, bytePacketLength.length);
 
         byte[] headerSubset = Arrays.copyOfRange(byteMessagePacket, 0, 13);
-        int calculatedHeaderCRC16 = calculateCRC16(headerSubset);
+        int calculatedHeaderCRC16 = CRC16.calculateCRC16(headerSubset);
 
         ByteBuffer b = ByteBuffer.allocate(4);
         b.putInt(calculatedHeaderCRC16);
@@ -70,7 +68,7 @@ class MessagePacket {
         System.arraycopy(message, 0, byteMessagePacket, 16, message.length);
 
         byte[] messageSubset = Arrays.copyOfRange(byteMessagePacket, 16, packetLength - 2);
-        int calculatedMessageCRC16 = calculateCRC16(messageSubset);
+        int calculatedMessageCRC16 = CRC16.calculateCRC16(messageSubset);
 
         ByteBuffer c = ByteBuffer.allocate(4);
         c.putInt(calculatedMessageCRC16);
@@ -79,7 +77,7 @@ class MessagePacket {
         return byteMessagePacket;
     }
 
-    byte[] encryptMessageBody(byte[] packet) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+    public byte[] encryptMessageBody(byte[] packet) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
 
         Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
         byte[] keyBytes = new byte[16];

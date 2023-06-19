@@ -12,7 +12,7 @@ import javax.crypto.NoSuchPaddingException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
-import static client_server.MessagePacketProcessor.isValidPacket;
+import static client_server.Decryptor.isValidPacket;
 
 
 public class MainTest extends TestCase
@@ -27,7 +27,7 @@ public class MainTest extends TestCase
         message.setMessageType(1);
         message.setUserID(1);
         message.setUsefulInfo("Some information");
-        MessagePacket messagePacket = MessagePacketBuilder.buildPacket(clientID, messageID, message);
+        MessagePacket messagePacket = Enryptor.buildPacket(clientID, messageID, message);
         byte[] encryptedByteMessagePacket = messagePacket.encryptMessageBody(messagePacket.toByte());
         String expectedOutput = "137f0000000000003cb90000002a611b4d8b359c4f9e1197a6c04161fb83a18a3e46ccd2244b25fd46016c8be139c667f67b";
         Assert.assertEquals(expectedOutput, Hex.encodeHexString(encryptedByteMessagePacket));
@@ -36,7 +36,7 @@ public class MainTest extends TestCase
     public void testMessagePacketDecryption() throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, DecoderException {
         String encryptedPacket = "137f0000000000003cb90000002a611b4d8b359c4f9e1197a6c04161fb83a18a3e46ccd2244b25fd46016c8be139c667f67b";
         byte[] encryptedByteMessagePacket = Hex.decodeHex(encryptedPacket.toCharArray());
-        MessagePacket mP = MessagePacketProcessor.parsePacket(encryptedByteMessagePacket);
+        MessagePacket mP = Decryptor.parsePacket(encryptedByteMessagePacket);
         Message m = mP.getMessage();
         int expectedClientId = 127;
         long expectedMessageId = 15545;

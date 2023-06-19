@@ -1,37 +1,37 @@
 package client_server;
 
-class Message {
+public class Message {
     private int messageType;
     private int userID;
     private String usefulInfo;
 
-    Message(int messageType, int userID, String usefulInfo) {
+    public Message(int messageType, int userID, String usefulInfo) {
         this.messageType = messageType;
         this.userID = userID;
         this.usefulInfo = usefulInfo;
     }
 
-    int getMessageType() {
+    public int getMessageType() {
         return messageType;
     }
 
-    void setMessageType(int messageType) {
+    public void setMessageType(int messageType) {
         this.messageType = messageType;
     }
 
-    int getUserID() {
+    public int getUserID() {
         return userID;
     }
 
-    void setUserID(int userID) {
+    public void setUserID(int userID) {
         this.userID = userID;
     }
 
-    String getUsefulInfo() {
+    public String getUsefulInfo() {
         return usefulInfo;
     }
 
-    void setUsefulInfo(String usefulInfo) {
+    public void setUsefulInfo(String usefulInfo) {
         this.usefulInfo = usefulInfo;
     }
 
