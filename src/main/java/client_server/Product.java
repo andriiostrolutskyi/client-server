@@ -1,4 +1,4 @@
-package client_server.pseudo_server;
+package client_server;
 
 public class Product {
 

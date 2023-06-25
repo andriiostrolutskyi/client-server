@@ -1,4 +1,4 @@
-package client_server.pseudo_client;
+package client_server;
 
 
 import javax.crypto.BadPaddingException;

@@ -1,36 +1,35 @@
-package client_server.pseudo_server;
-
-import client_server.Message;
-
+package client_server;
 public class Processor {
 
-    public static void process(Message message) {
+    public static String process(Message message) {
         Object[] requestInfo = extractValues(message.getUsefulInfo());
         switch ((int) requestInfo[0]) {
             case 1:
                 System.out.println("Number of products in storage = " + Storage.getNumberOfProducts());
-                System.out.println("Ok");
-                break;
+                return "OK";
+
             case 2:
                 Storage.subtractProducts((int) requestInfo[1]);
                 System.out.println("Number of products in storage after subtracting = " + Storage.getNumberOfProducts());
-                System.out.println("Ok");
-                break;
+                return "OK";
+
             case 3:
                 Storage.addProducts((int) requestInfo[1]);
                 System.out.println("Number of products in storage after adding = " + Storage.getNumberOfProducts());
-                System.out.println("Ok");
-                break;
+                return "OK";
+
             case 4:
                 ProductGroup productGroup = new ProductGroup((String) requestInfo[1]);
                 System.out.println("Created " + productGroup.getProductGroupName() + " product group");
-                System.out.println("Ok");
-                break;
+                return "OK";
+
             case 5:
                 Product.setPrice((int) requestInfo[1]);
                 System.out.println("Set price to be " + Product.getPrice());
-                System.out.println("Ok");
-                break;
+                return "OK";
+
+            default:
+                return "Request has not been processed";
         }
     }
 

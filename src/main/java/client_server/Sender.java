@@ -1,9 +1,6 @@
-package client_server.pseudo_client;
+package client_server;
 
-import client_server.Message;
-import client_server.MessagePacket;
-import client_server.Enryptor;
-import client_server.pseudo_server.Receiver;
+import client_server.*;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -23,7 +20,4 @@ public class Sender {
         return encryptedByteMessagePacket;
     }
 
-    public void sendMessage(ArrayList<byte[]> encryptedByteMessagePackets, Receiver to) throws ExecutionException, InterruptedException {
-        to.receiveMessage(encryptedByteMessagePackets);
-    }
 }

@@ -1,8 +1,8 @@
-package client_server.pseudo_server;
+package client_server;
 
 public class Storage {
 
-    private static int numberOfProducts = 100;
+    private static int numberOfProducts = 0;
 
     public Storage(int numberOfProducts) {
         Storage.numberOfProducts = numberOfProducts;

@@ -6,11 +6,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 
-import client_server.pseudo_client.Client;
-import client_server.pseudo_client.Sender;
-import client_server.pseudo_server.Receiver;
-import client_server.pseudo_server.Storage;
-
 
 public class Main {
 
@@ -33,7 +28,7 @@ public class Main {
         requests.add(client1.addProductGroup("Dairy"));
         requests.add(client1.setPrice(123));
 
-        sender.sendMessage(requests, receiver);
+        //sender.sendMessage(requests, receiver);
 
         System.out.println("The actual number of products in Storage: " + Storage.getNumberOfProducts());
 
