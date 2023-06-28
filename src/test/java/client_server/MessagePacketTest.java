@@ -15,7 +15,7 @@ import java.security.NoSuchAlgorithmException;
 import static client_server.Decryptor.isValidPacket;
 
 
-public class MainTest extends TestCase
+public class MessagePacketTest extends TestCase
 {
     public void testMessagePacketEncryption() throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
         int messageType = 2;

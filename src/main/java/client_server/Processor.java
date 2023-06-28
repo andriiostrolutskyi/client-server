@@ -1,32 +1,35 @@
 package client_server;
+
+import client_server.entities.Category;
+
 public class Processor {
 
     public static String process(Message message) {
         Object[] requestInfo = extractValues(message.getUsefulInfo());
         switch ((int) requestInfo[0]) {
             case 1:
-                System.out.println("Number of products in storage = " + Storage.getNumberOfProducts());
+//                System.out.println("Number of products in storage = " + Storage.getNumberOfProducts());
                 return "OK";
 
             case 2:
-                Storage.subtractProducts((int) requestInfo[1]);
-                System.out.println("Number of products in storage after subtracting = " + Storage.getNumberOfProducts());
-                return "OK";
+//                Storage.subtractProducts((int) requestInfo[1]);
+//                System.out.println("Number of products in storage after subtracting = " + Storage.getNumberOfProducts());
+//                return "OK";
 
             case 3:
-                Storage.addProducts((int) requestInfo[1]);
-                System.out.println("Number of products in storage after adding = " + Storage.getNumberOfProducts());
-                return "OK";
+//                Storage.addProducts((int) requestInfo[1]);
+//                System.out.println("Number of products in storage after adding = " + Storage.getNumberOfProducts());
+//                return "OK";
 
             case 4:
-                ProductGroup productGroup = new ProductGroup((String) requestInfo[1]);
-                System.out.println("Created " + productGroup.getProductGroupName() + " product group");
+                Category productGroup = new Category((String) requestInfo[1], "test");
+                System.out.println("Created " + productGroup.getName() + " product group");
                 return "OK";
 
             case 5:
-                Product.setPrice((int) requestInfo[1]);
-                System.out.println("Set price to be " + Product.getPrice());
-                return "OK";
+//                Product.setPrice((int) requestInfo[1]);
+//                System.out.println("Set price to be " + Product.getPrice());
+//                return "OK";
 
             default:
                 return "Request has not been processed";
