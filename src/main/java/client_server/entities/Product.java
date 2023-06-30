@@ -1,7 +1,5 @@
 package client_server.entities;
 
-import client_server.entities.Category;
-
 public class Product {
 
     String name;

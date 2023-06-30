@@ -18,6 +18,12 @@ public class DB implements DAO {
         );
     }
 
+    public void close() throws SQLException {
+        if (connection != null) {
+            connection.close();
+        }
+    }
+
     @Override
     public void addCategory(Category category) throws SQLException {
         PreparedStatement statement = connection.prepareStatement("INSERT INTO category VALUES (?,?)");
@@ -82,6 +88,23 @@ public class DB implements DAO {
 
     @Override
     public Product searchProduct(String name) throws SQLException {
+        Product product = new Product();
+        PreparedStatement statement = connection.prepareStatement("SELECT * FROM product WHERE product_name = ?");
+        statement.setString(1, name);
+        ResultSet resultSet = statement.executeQuery();
+        if (resultSet.next()) {
+            product.setName(resultSet.getString("product_name"));
+            product.setCharacteristics(resultSet.getString("characteristics"));
+            product.setManufacturer(resultSet.getString("manufacturer"));
+            product.setQuantity(resultSet.getInt("quantity"));
+            product.setPrice(resultSet.getInt("price"));
+            product.setCategory(searchCategory(resultSet.getString("category_name")));
+        }
+        return product;
+    }
+
+    public List<Product> searchProductByName(String name) throws SQLException {
+        List<Product> products = new ArrayList<>();
         PreparedStatement statement = connection.prepareStatement("SELECT * FROM product WHERE product_name = ?");
         statement.setString(1, name);
         ResultSet resultSet = statement.executeQuery();
@@ -93,9 +116,9 @@ public class DB implements DAO {
             product.setQuantity(resultSet.getInt("quantity"));
             product.setPrice(resultSet.getInt("price"));
             product.setCategory(searchCategory(resultSet.getString("category_name")));
-            return product;
+            products.add(product);
         }
-        return null;
+        return products;
     }
 
     @Override
@@ -114,6 +137,20 @@ public class DB implements DAO {
             products.add(product);
         }
         return products;
+    }
+
+    @Override
+    public List<Category> lookUpAllCategories() throws SQLException {
+        List<Category> categories = new ArrayList<>();
+        PreparedStatement statement = connection.prepareStatement("SELECT * FROM category");
+        ResultSet resultSet = statement.executeQuery();
+        while (resultSet.next()) {
+            Category category = new Category();
+            category.setName(resultSet.getString("category_name"));
+            category.setCharacteristics(resultSet.getString("characteristics"));
+            categories.add(category);
+        }
+        return categories;
     }
 
     @Override
@@ -138,7 +175,7 @@ public class DB implements DAO {
     @Override
     public int getPriceOfAllProducts() throws SQLException {
         int total = 0;
-        PreparedStatement statement = connection.prepareStatement("SELECT SUM(price) AS total FROM product");
+        PreparedStatement statement = connection.prepareStatement("SELECT SUM(quantity*price) AS total FROM product");
         ResultSet resultSet = statement.executeQuery();
         if (resultSet.next()) {
             total = resultSet.getInt("total");
@@ -149,7 +186,19 @@ public class DB implements DAO {
     @Override
     public int getPriceOfProductsByCategory(String name) throws SQLException {
         int total = 0;
-        PreparedStatement statement = connection.prepareStatement("SELECT SUM(price) AS total FROM product WHERE category_name = ?");
+        PreparedStatement statement = connection.prepareStatement("SELECT SUM(quantity*price) AS total FROM product WHERE category_name = ?");
+        statement.setString(1, name);
+        ResultSet resultSet = statement.executeQuery();
+        if (resultSet.next()) {
+            total = resultSet.getInt("total");
+        }
+        return total;
+    }
+
+    @Override
+    public int getPriceOfProductsByName(String name) throws SQLException {
+        int total = 0;
+        PreparedStatement statement = connection.prepareStatement("SELECT quantity*price AS total FROM product WHERE product_name = ?");
         statement.setString(1, name);
         ResultSet resultSet = statement.executeQuery();
         if (resultSet.next()) {
@@ -162,7 +211,20 @@ public class DB implements DAO {
     public int getNumberOfAllProducts() throws SQLException {
         int num = 0;
         Statement statement = connection.createStatement();
-        ResultSet resultSet = statement.executeQuery("SELECT SUM(quantity) AS num FROM product");        if (resultSet.next()) {
+        ResultSet resultSet = statement.executeQuery("SELECT SUM(quantity) AS num FROM product");
+        if (resultSet.next()) {
+            num = resultSet.getInt("num");
+        }
+        return num;
+    }
+
+    @Override
+    public int getNumberOfProductsByCategory(String name) throws SQLException {
+        int num = 0;
+        PreparedStatement statement = connection.prepareStatement("SELECT SUM(quantity) AS num FROM product WHERE category_name = ?");
+        statement.setString(1, name);
+        ResultSet resultSet = statement.executeQuery();
+        if (resultSet.next()) {
             num = resultSet.getInt("num");
         }
         return num;
@@ -208,4 +270,5 @@ public class DB implements DAO {
         }
         return null;
     }
+
 }

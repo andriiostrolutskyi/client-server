@@ -16,10 +16,15 @@ public interface DAO {
     void deleteProduct(String name) throws SQLException;
     Product searchProduct(String name) throws SQLException;
     List<Product> lookUpAllProducts() throws SQLException;
+
+    List<Category> lookUpAllCategories() throws SQLException;
+
     List<Product> lookUpProductsByCategory(String name) throws SQLException;
     int getPriceOfAllProducts() throws SQLException;
     int getPriceOfProductsByCategory(String name) throws SQLException;
+    int getPriceOfProductsByName(String name) throws SQLException;
     int getNumberOfAllProducts() throws SQLException;
+    int getNumberOfProductsByCategory(String name) throws SQLException;
     void addNumberOfProduct(String name, int number) throws SQLException;
     void subtractNumberOfProduct(String name, int number) throws SQLException;
     void setPrice(String name, int price) throws SQLException;
