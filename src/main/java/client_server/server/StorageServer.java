@@ -4,6 +4,9 @@ import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.security.*;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
@@ -14,18 +17,54 @@ import java.util.concurrent.Executors;
 import client_server.database.DB;
 import client_server.entities.Category;
 import client_server.entities.Product;
-import com.sun.net.httpserver.Headers;
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
-import com.sun.net.httpserver.HttpServer;
+import com.sun.net.httpserver.*;
+
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 public class StorageServer {
     static final int nThreads = 10;
+    static final String KEYSTORE_PATH = "mykeystore.jks";
+    static final String KEYSTORE_PASSWORD = "andrii";
 
     public static void main(String[] args) {
         try {
-            HttpServer server = HttpServer.create(new InetSocketAddress(8888), 0);
+            // Load the keystore
+            KeyStore keyStore = KeyStore.getInstance("JKS");
+            FileInputStream fileInputStream = new FileInputStream(KEYSTORE_PATH);
+            keyStore.load(fileInputStream, KEYSTORE_PASSWORD.toCharArray());
 
+            // Create a KeyManagerFactory
+            KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance("SunX509");
+            keyManagerFactory.init(keyStore, KEYSTORE_PASSWORD.toCharArray());
+
+            // Create a TrustManagerFactory that accepts all certificates
+            TrustManager[] trustManagers = new TrustManager[]{new X509TrustManager() {
+                @Override
+                public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+                }
+
+                @Override
+                public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+                }
+
+                @Override
+                public X509Certificate[] getAcceptedIssuers() {
+                    return null;
+                }
+            }};
+
+            // Create an SSLContext and initialize it with the KeyManagerFactory and TrustManagerFactory
+            SSLContext sslContext = SSLContext.getInstance("TLS");
+            sslContext.init(keyManagerFactory.getKeyManagers(), trustManagers, null);
+
+            // Create a new HTTPS server on port 8888
+            HttpsServer server = HttpsServer.create(new InetSocketAddress(8888), 0);
+            server.setHttpsConfigurator(new HttpsConfigurator(sslContext));
+
+            // Create a fixed-size thread pool with 10 threads
             Executor executor = Executors.newFixedThreadPool(nThreads);
 
             server.createContext("/home", new HomeHandler());
@@ -51,7 +90,8 @@ public class StorageServer {
             server.setExecutor(executor);
             server.start();
             System.out.println("Server started.");
-        } catch (IOException e) {
+        } catch (IOException | NoSuchAlgorithmException | KeyStoreException | CertificateException |
+                 UnrecoverableKeyException | KeyManagementException e) {
             e.printStackTrace();
         }
     }
