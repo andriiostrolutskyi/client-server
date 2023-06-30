@@ -31,16 +31,13 @@ public class StorageServer {
 
     public static void main(String[] args) {
         try {
-            // Load the keystore
             KeyStore keyStore = KeyStore.getInstance("JKS");
             FileInputStream fileInputStream = new FileInputStream(KEYSTORE_PATH);
             keyStore.load(fileInputStream, KEYSTORE_PASSWORD.toCharArray());
 
-            // Create a KeyManagerFactory
             KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance("SunX509");
             keyManagerFactory.init(keyStore, KEYSTORE_PASSWORD.toCharArray());
 
-            // Create a TrustManagerFactory that accepts all certificates
             TrustManager[] trustManagers = new TrustManager[]{new X509TrustManager() {
                 @Override
                 public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
@@ -56,15 +53,12 @@ public class StorageServer {
                 }
             }};
 
-            // Create an SSLContext and initialize it with the KeyManagerFactory and TrustManagerFactory
             SSLContext sslContext = SSLContext.getInstance("TLS");
             sslContext.init(keyManagerFactory.getKeyManagers(), trustManagers, null);
 
-            // Create a new HTTPS server on port 8888
             HttpsServer server = HttpsServer.create(new InetSocketAddress(8888), 0);
             server.setHttpsConfigurator(new HttpsConfigurator(sslContext));
 
-            // Create a fixed-size thread pool with 10 threads
             Executor executor = Executors.newFixedThreadPool(nThreads);
 
             server.createContext("/home", new HomeHandler());
