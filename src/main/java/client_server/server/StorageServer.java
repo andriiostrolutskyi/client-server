@@ -2,6 +2,7 @@ package client_server.server;
 
 import java.io.*;
 import java.net.InetSocketAddress;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -23,10 +24,8 @@ public class StorageServer {
 
     public static void main(String[] args) {
         try {
-            // Create a new HTTP server on port 8888
             HttpServer server = HttpServer.create(new InetSocketAddress(8888), 0);
 
-            // Create a fixed-size thread pool with 10 threads
             Executor executor = Executors.newFixedThreadPool(nThreads);
 
             server.createContext("/home", new HomeHandler());
@@ -66,15 +65,12 @@ public class StorageServer {
         public void handle(HttpExchange exchange) throws IOException {
             db = new DB();
             try {
-                // Initialize the DB object
                 db.init();
-                // Retrieve the list of all products
                 products = db.lookUpAllProducts();
             } catch (SQLException | ClassNotFoundException | InterruptedException e) {
                 e.printStackTrace();
             }
 
-            // JavaScript functions for adding and subtracting products
             String script = "<script>\n" +
                     "function addProduct() {\n" +
                     "   var selectedProduct = document.getElementById('productDropdown').value;\n" +
@@ -105,7 +101,6 @@ public class StorageServer {
                     "}\n" +
                     "</script>\n";
 
-            // HTML content to be displayed
             StringBuilder htmlResponse = new StringBuilder();
             htmlResponse.append("<html><body>");
             htmlResponse.append("<h1>Storage</h1>");
@@ -116,7 +111,6 @@ public class StorageServer {
             htmlResponse.append("</div>");
             htmlResponse.append("<select id='productDropdown'>");
 
-            // Add each product as an option in the dropdown list
             for (Product product : products) {
                 htmlResponse.append("<option value='").append(product.getName()).append("'>").append(product.getName()).append("</option>");
             }
@@ -128,12 +122,10 @@ public class StorageServer {
             htmlResponse.append("<button onclick='addProduct()'>Add</button>");
             htmlResponse.append("<button onclick='subtractProduct()'>Subtract</button>");
 
-            // Add the script to the response
             htmlResponse.insert(0, script);
 
             htmlResponse.append("</body></html>");
 
-            // Set the response headers
             String response = htmlResponse.toString();
             exchange.sendResponseHeaders(200, response.length());
             OutputStream outputStream = exchange.getResponseBody();
@@ -157,7 +149,6 @@ public class StorageServer {
                 throw new RuntimeException(e);
             }
 
-            // Redirect back to the home page
             exchange.getResponseHeaders().set("Location", "/home");
             exchange.sendResponseHeaders(302, -1);
             exchange.close();
@@ -178,7 +169,6 @@ public class StorageServer {
                 throw new RuntimeException(e);
             }
 
-            // Redirect back to the home page
             exchange.getResponseHeaders().set("Location", "/home");
             exchange.sendResponseHeaders(302, -1);
             exchange.close();
@@ -245,7 +235,6 @@ public class StorageServer {
 
         public void handle(HttpExchange exchange) throws IOException {
 
-            // Retrieve the submitted values from the request body
             String requestBody = new String(exchange.getRequestBody().readAllBytes());
             String[] params = requestBody.split("&");
             String categoryName = "";
@@ -254,14 +243,13 @@ public class StorageServer {
                 String[] keyValue = param.split("=");
                 if (keyValue.length == 2) {
                     if ("category_name".equals(keyValue[0])) {
-                        categoryName = keyValue[1];
+                        categoryName = URLDecoder.decode(keyValue[1]);
                     } else if ("characteristics".equals(keyValue[0])) {
-                        characteristics = keyValue[1];
+                        characteristics = URLDecoder.decode(keyValue[1]);
                     }
                 }
             }
 
-            // Create a Category object using the submitted values
             Category category = new Category(categoryName, characteristics);
 
             try {
@@ -273,22 +261,20 @@ public class StorageServer {
                 e.printStackTrace();
             }
 
-            // Send a redirect response to the client
             Headers headers = exchange.getResponseHeaders();
             headers.set("Location", "/category");
-            exchange.sendResponseHeaders(302, -1); // 302 Found (redirect) status code
+            exchange.sendResponseHeaders(302, -1);
             exchange.close();
         }
     }
 
     static class EditCategoryHandler implements HttpHandler {
         public void handle(HttpExchange exchange) throws IOException {
-            // Retrieve the category name from the request parameters
             String categoryName = null;
             if (exchange.getRequestMethod().equalsIgnoreCase("POST")) {
                 String requestBody = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
                 Map<String, String> params = parseParams(requestBody);
-                categoryName = params.get("name");
+                categoryName = params.get("category");
             }
             exchange.getResponseHeaders().set("Content-Type", "text/html");
             exchange.sendResponseHeaders(200, 0);
@@ -317,7 +303,7 @@ public class StorageServer {
 
     static class PostEditCategoryHandler implements HttpHandler {
         public void handle(HttpExchange exchange) throws IOException {
-            String categoryName = extractCategoryNameFromRequestURI(exchange.getRequestURI().toString());
+            String categoryName = URLDecoder.decode(extractCategoryNameFromRequestURI(exchange.getRequestURI().toString()));
 
             try {
                 DB db = new DB();
@@ -332,7 +318,7 @@ public class StorageServer {
                     for (String param : params) {
                         String[] keyValue = param.split("=");
                         if (keyValue.length == 2 && "characteristics".equals(keyValue[0])) {
-                            characteristics = keyValue[1];
+                            characteristics = URLDecoder.decode(keyValue[1]);
                             break;
                         }
                     }
@@ -372,29 +358,27 @@ public class StorageServer {
 
     static class PostDeleteCategoryHandler implements HttpHandler {
         public void handle(HttpExchange exchange) throws IOException {
-            // Retrieve the category name from the request parameters
             String categoryName = null;
             if (exchange.getRequestMethod().equalsIgnoreCase("POST")) {
                 String requestBody = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
                 Map<String, String> params = parseParams(requestBody);
-                categoryName = params.get("category");
+                categoryName = URLDecoder.decode(params.get("category"));
             }
 
             try {
                 DB db = new DB();
                 db.init();
-                db.deleteCategory(categoryName); // Call the deleteCategory method with the category name
+                db.deleteCategory(categoryName);
                 db.close();
             } catch (Exception e) {
                 e.printStackTrace();
             }
             Headers headers = exchange.getResponseHeaders();
             headers.set("Location", "/category");
-            exchange.sendResponseHeaders(302, -1); // 302 Found (redirect) status code
+            exchange.sendResponseHeaders(302, -1);
             exchange.close();
         }
 
-        // Helper method to parse request parameters
         private Map<String, String> parseParams(String requestBody) {
             Map<String, String> params = new HashMap<>();
             String[] pairs = requestBody.split("&");
@@ -463,7 +447,6 @@ public class StorageServer {
         responseBuilder.append("<h3><a href=\"/category\">Categories</a></h3>");
         responseBuilder.append("</div>");
 
-        // Add category form
         responseBuilder.append("<h2>Add Category</h2>");
         responseBuilder.append("<form method=\"POST\" action=\"/category/addCategory\">");
         responseBuilder.append("<label for=\"category_name\">Category Name:</label>");
@@ -487,7 +470,6 @@ public class StorageServer {
         responseBuilder.append("<h3><a href=\"/category\">Categories</a></h3>");
         responseBuilder.append("</div>");
 
-        // Edit category form
         responseBuilder.append("<h2>Edit Category " + categoryName + "</h2>");
         responseBuilder.append("<form method=\"POST\" action=\"/category/editCategory?name=" + categoryName + "\">");
         responseBuilder.append("<input type=\"hidden\" name=\"category_name\" value=\"" + categoryName + "\">");
@@ -505,11 +487,9 @@ public class StorageServer {
     static class ProductHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
-            // Set the response content type as HTML
             exchange.getResponseHeaders().set("Content-Type", "text/html");
             exchange.sendResponseHeaders(200, 0);
 
-            // Get the list of products
             List<Product> products;
             int price;
             int number;
@@ -530,7 +510,6 @@ public class StorageServer {
 
             StringBuilder responseBuilder = buildTableOfProducts(products, price, number);
 
-            // Send the response
             OutputStream response = exchange.getResponseBody();
             response.write(responseBuilder.toString().getBytes());
             response.close();
@@ -540,7 +519,6 @@ public class StorageServer {
     static class SearchByCategoryHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
-            // Get the category parameter from the query string
             String queryString = exchange.getRequestURI().getQuery();
             String[] queryParams = queryString.split("=");
             if (queryParams.length != 2 || !queryParams[0].equals("category")) {
@@ -551,13 +529,11 @@ public class StorageServer {
                 return;
             }
 
-            String categoryName = queryParams[1];
+            String categoryName = URLDecoder.decode(queryParams[1]);
 
-            // Set the response content type as HTML
             exchange.getResponseHeaders().set("Content-Type", "text/html");
             exchange.sendResponseHeaders(200, 0);
 
-            // Get the list of products by category
             List<Product> products;
             int price;
             int num;
@@ -578,7 +554,6 @@ public class StorageServer {
 
             StringBuilder responseBuilder = buildTableOfProducts(products, price, num);
 
-            // Send the response
             OutputStream response = exchange.getResponseBody();
             response.write(responseBuilder.toString().getBytes());
             response.close();
@@ -598,9 +573,8 @@ public class StorageServer {
                 return;
             }
 
-            String name = queryParams[1];
+            String name = URLDecoder.decode(queryParams[1]);
 
-            // Set the response content type as HTML
             exchange.getResponseHeaders().set("Content-Type", "text/html");
             exchange.sendResponseHeaders(200, 0);
 
@@ -622,7 +596,6 @@ public class StorageServer {
 
             StringBuilder responseBuilder = buildTableOfProducts(products, price, 0);
 
-            // Send the response
             OutputStream response = exchange.getResponseBody();
             response.write(responseBuilder.toString().getBytes());
             response.close();
@@ -657,17 +630,17 @@ public class StorageServer {
                 String[] keyValue = param.split("=");
                 if (keyValue.length == 2) {
                     if ("name".equals(keyValue[0])) {
-                        name = keyValue[1];
+                        name = URLDecoder.decode(keyValue[1]);
                     } else if ("characteristics".equals(keyValue[0])) {
-                        characteristics = keyValue[1];
+                        characteristics = URLDecoder.decode(keyValue[1]);
                     } else if ("manufacturer".equals(keyValue[0])) {
-                        manufacturer = keyValue[1];
+                        manufacturer = URLDecoder.decode(keyValue[1]);
                     } else if ("quantity".equals(keyValue[0])) {
                         quantity = Integer.parseInt(keyValue[1]);
                     } else if ("price".equals(keyValue[0])) {
                         price = Integer.parseInt(keyValue[1]);
                     } else if ("category".equals(keyValue[0])) {
-                        categoryName = keyValue[1];
+                        categoryName = URLDecoder.decode(keyValue[1]);
                     }
                 }
             }
@@ -692,7 +665,6 @@ public class StorageServer {
 
     static class EditProductHandler implements HttpHandler {
         public void handle(HttpExchange exchange) throws IOException {
-            // Retrieve the product name from the request parameters
             String productName = null;
             if (exchange.getRequestMethod().equalsIgnoreCase("POST")) {
                 String requestBody = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
@@ -726,7 +698,7 @@ public class StorageServer {
 
     static class PostEditProductHandler implements HttpHandler {
         public void handle(HttpExchange exchange) throws IOException {
-            String productName = extractProductNameFromRequestURI(exchange.getRequestURI().toString());
+            String productName = URLDecoder.decode(extractProductNameFromRequestURI(exchange.getRequestURI().toString()));
 
             try {
                 DB db = new DB();
@@ -749,10 +721,10 @@ public class StorageServer {
                             String value = keyValue[1];
                             switch (key) {
                                 case "characteristics":
-                                    characteristics = value;
+                                    characteristics = URLDecoder.decode(value);
                                     break;
                                 case "manufacturer":
-                                    manufacturer = value;
+                                    manufacturer = URLDecoder.decode(value);
                                     break;
                                 case "quantity":
                                     quantity = Integer.parseInt(value);
@@ -761,10 +733,9 @@ public class StorageServer {
                                     price = Integer.parseInt(value);
                                     break;
                                 case "category":
-                                    category = db.searchCategory(value);
+                                    category = db.searchCategory(URLDecoder.decode(value));
                                     break;
                                 default:
-                                    // Handle other fields if needed
                                     break;
                             }
                         }
@@ -808,12 +779,11 @@ public class StorageServer {
 
     static class PostDeleteProductHandler implements HttpHandler {
         public void handle(HttpExchange exchange) throws IOException {
-            // Retrieve the category name from the request parameters
             String productName = null;
             if (exchange.getRequestMethod().equalsIgnoreCase("POST")) {
                 String requestBody = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
                 Map<String, String> params = parseParams(requestBody);
-                productName = params.get("name");
+                productName = URLDecoder.decode(params.get("name"));
             }
 
             try {
@@ -826,11 +796,10 @@ public class StorageServer {
             }
             Headers headers = exchange.getResponseHeaders();
             headers.set("Location", "/product");
-            exchange.sendResponseHeaders(302, -1); // 302 Found (redirect) status code
+            exchange.sendResponseHeaders(302, -1);
             exchange.close();
         }
 
-        // Helper method to parse request parameters
         private Map<String, String> parseParams(String requestBody) {
             Map<String, String> params = new HashMap<>();
             String[] pairs = requestBody.split("&");
@@ -848,7 +817,6 @@ public class StorageServer {
 
     /*Product builders--------------------------------------------------*/
     private static StringBuilder buildTableOfProducts(List<Product> products, int price, int number) {
-        // Prepare the HTML response
         StringBuilder responseBuilder = new StringBuilder();
         responseBuilder.append("<html><body>");
         responseBuilder.append("<h1>Storage</h1>");
@@ -870,7 +838,6 @@ public class StorageServer {
         responseBuilder.append("</form>");
         responseBuilder.append("</div>");
 
-        // Generate HTML table for products
         responseBuilder.append("<table>");
         responseBuilder.append("<tr>");
         responseBuilder.append("<th>Name</th>");
@@ -884,7 +851,6 @@ public class StorageServer {
         responseBuilder.append("</th>");
         responseBuilder.append("</tr>");
 
-        // Generate table rows for each product
         for (Product product : products) {
             responseBuilder.append("<tr>");
             responseBuilder.append("<td>").append(product.getName()).append("</td>");
@@ -927,7 +893,6 @@ public class StorageServer {
         responseBuilder.append("<h3><a href=\"/category\">Categories</a></h3>");
         responseBuilder.append("</div>");
 
-        // Add product form
         responseBuilder.append("<h2>Add Product</h2>");
         responseBuilder.append("<form method=\"POST\" action=\"/product/addProduct\">");
         responseBuilder.append("<label for=\"name\">Name:</label>");
@@ -959,7 +924,6 @@ public class StorageServer {
         responseBuilder.append("<h3><a href=\"/category\">Categories</a></h3>");
         responseBuilder.append("</div>");
 
-        // Edit product form
         responseBuilder.append("<h2>Edit Product " + productName + "</h2>");
         responseBuilder.append("<form method=\"POST\" action=\"/product/editProduct?name=" + productName + "\">");
         responseBuilder.append("<input type=\"hidden\" name=\"product_name\" value=\"" + productName + "\">");
